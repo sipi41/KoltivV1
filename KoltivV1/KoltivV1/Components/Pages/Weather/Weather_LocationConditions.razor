@@ -1,0 +1,131 @@
+﻿@using KoltivV1.Application
+@using KoltivV1.Components.Pages.Weather.Weather_LocationConditions_Comps
+@using KoltivV1.ViewModels
+@using KoltivV1.ViewModels.Weather.Gov.API
+@rendermode InteractiveServer
+@inject IWeatherRepository WeatherRepository
+@inject IJSRuntime js
+
+@if (point != null)
+{
+	<div class="container-fluid mt-2">
+		<div class="row">
+			<div class="col-4">
+
+				<div class="card mb-3" style="">
+					<div class="row g-0">
+						<div class="col-md-4">	
+							
+							<MainImage DailyForecast="@DailyForecast"></MainImage>							
+
+						</div>
+						<div class="col-md-8">
+							<div class="card-body">
+								
+								<div class="text-secondary" style="font-size:small">Current conditions at</div>
+								<h5 class="card-title fw-bold">@point.RelativeLocation.Properties.City, @point.RelativeLocation.Properties.State</h5>
+								
+								<CurrentCondition Period="@DailyForecast?.Periods[0]" LastUpdateTime="@DailyForecast?.UpdateTime"></CurrentCondition>
+
+								
+								
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="col">	
+				<div class="row">
+
+					@if (HourlyForecast != null)
+					{
+						<HourByHourConditions Periods="@HourlyForecast.Periods.Skip(1).Take(6)"></HourByHourConditions>
+					}	else
+					{
+						<div class="text-muted" style="font-size:x-small;">loading data, please wait...</div>
+					}
+
+				</div>
+
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col">
+				<h3 class="text-secondary">Next 3 Days at a glance...</h3>
+			</div>
+		</div>
+		<div class="row">
+			@if (DailyForecast != null)
+			{
+				<DayByDayConditions Periods="@DailyForecast.Periods.Skip(1).Take(6)"></DayByDayConditions> 
+			}
+			else
+			{
+				<div class="text-muted" style="font-size:x-small;">loading data, please wait...</div>
+			}
+		</div>
+
+	</div>
+	
+}
+else
+{
+	<p class="p-3 text-muted">No location selected, please click the map to start...</p>
+}
+
+@code {
+
+	[Parameter, EditorRequired]
+	public ILocalizable? Location { get; set; }
+
+	private ILocalizable? LastLocation { get; set; }
+
+	private IWeatherPoint? point { get; set; } = null;
+
+	private Forecast_Hourly? HourlyForecast { get; set; }
+	private Forecast_Daily? DailyForecast { get; set; }
+
+	protected async override Task OnParametersSetAsync()
+	{
+		if(LastLocation != Location)
+		{			
+			if (Location != null)
+			{
+				point = await WeatherRepository.GetPointInformation(Location.lat, Location.lng);
+
+				HourlyForecast = null;
+				DailyForecast = null;
+
+				StateHasChanged();
+
+				HourlyForecast = await WeatherRepository.Get_Hourly_Forecast(point.ForecastHourly);
+
+				//await js.InvokeVoidAsync("console.log", "HOURLY", HourlyForecast);
+
+				DailyForecast = await WeatherRepository.Get_Daily_Forecast(point.Forecast);
+
+				//await js.InvokeVoidAsync("console.log", "DAILY", DailyForecast);
+
+				StateHasChanged();
+			}
+
+			LastLocation = Location;
+
+		}
+
+		await base.OnParametersSetAsync();
+	}
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
+	}
+
+}

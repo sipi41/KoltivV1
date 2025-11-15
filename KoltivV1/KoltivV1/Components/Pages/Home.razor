@@ -1,0 +1,27 @@
+﻿@page "/"
+@using KoltivV1.Components.Pages.Weather
+@using System.Text.Json
+@using System.Text.Json.Nodes
+@using KoltivV1.ViewModels.Weather.Gov.API
+@inject IJSRuntime js
+@inject IHttpClientFactory HttpClientFactory
+
+@rendermode InteractiveServer
+
+
+<PageTitle>Guillermo's US Weather App</PageTitle>
+
+<Weather></Weather>
+
+@code{
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
+	}
+
+ }

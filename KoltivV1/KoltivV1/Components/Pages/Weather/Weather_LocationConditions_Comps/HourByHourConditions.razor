@@ -1,0 +1,33 @@
+﻿@using KoltivV1.ViewModels.Weather.Gov.API
+
+@if (Periods.Any())
+{
+	foreach (Forecast_Period_Hourly item in Periods)
+	{
+		<div class="col-2">
+
+			<div class="card " style="">
+				<img src="@item.Icon" class="card-img-top" alt="...">
+				<div class="card-body pt-1 px-2">
+					<div class="text-muted" style="font-size:x-small">@item.StartTime.ToString("h tt") to @item.EndTime.ToString("h tt")</div>
+					<h4 class="m-0 text-primary card-title"><b>@(item.Temperature)@item.TemperatureUnit</b></h4>
+					<h5 class="" style="font-size:1.05rem !important;">@item.ShortForecast</h5>
+				</div>
+			</div>
+
+		</div>
+	}
+
+}
+else
+{
+	<div class="p-3 text-muted" style="font-size:x-small;">loading...</div>
+}
+
+@code {
+
+	[Parameter, EditorRequired]
+	public IEnumerable<Forecast_Period_Hourly> Periods { get; set; } = Enumerable.Empty<Forecast_Period_Hourly>();
+
+
+}

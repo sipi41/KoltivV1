@@ -1,0 +1,50 @@
+﻿@using KoltivV1.ViewModels.Weather.Gov.API
+
+@if (DailyForecast != null)
+{
+	<div class="rounded h-100 w-100 bg-danger background" style="background-image: url('@backgroundImageUrl'); background-repeat: no-repeat;   background-size: cover;"></div>
+
+} else 
+{
+	<div class="p-3 text-muted" style="font-size:x-small;">loading...</div>
+}
+
+@code {
+
+	[Parameter, EditorRequired]
+	public Forecast_Daily? DailyForecast { get; set; }
+
+	private Forecast_Daily? currentDailyForecast { get; set; }
+
+	string backgroundImageUrl = string.Empty;
+
+	protected override void OnParametersSet()
+	{
+		if (DailyForecast != currentDailyForecast)
+		{
+			if (DailyForecast != null)
+			{
+				backgroundImageUrl = DailyForecast.Periods[0].Icon.Replace("medium", "large");
+				StateHasChanged();
+
+				currentDailyForecast = DailyForecast;
+
+			}
+
+
+			
+		}
+		base.OnParametersSet();
+	}
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
+	}
+
+}

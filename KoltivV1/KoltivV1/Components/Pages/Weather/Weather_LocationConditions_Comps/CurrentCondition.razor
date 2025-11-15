@@ -1,0 +1,23 @@
+﻿@using KoltivV1.ViewModels.Weather.Gov.API
+
+@if (Period != null && LastUpdateTime != null)
+{
+	<p class="card-text">@Period.DetailedForecast</p>
+
+    <p class="card-text"><small class="text-muted" style="font-size:small">Updated @((DateTime.Now - LastUpdateTime.Value).Minutes) mins ago</small></p>
+
+}
+else
+{
+    <div class="p-3 text-muted" style="font-size:x-small;">loading...</div>
+}
+
+@code {
+
+    [Parameter, EditorRequired]
+    public Forecast_Period? Period { get; set; }
+
+    [Parameter, EditorRequired]
+    public DateTime? LastUpdateTime { get; set; }	
+
+}

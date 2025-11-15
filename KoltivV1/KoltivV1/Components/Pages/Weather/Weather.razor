@@ -1,0 +1,58 @@
+﻿@using KoltivV1.Application
+@using System.Text.Json
+@using KoltivV1.ViewModels
+
+@inject IRepository Repository
+@inject IJSRuntime js
+@rendermode InteractiveServer
+
+@inject ILogger<Home> Logger
+
+<ErrorBoundary>
+
+	<ChildContent>
+
+		<div class="p-3" style="background-size:100% auto; background-repeat:no-repeat; background-position-y:35%; background-image:url('https://thumbs.dreamstime.com/b/weather-forecast-concept-collage-variety-conditions-climate-change-background-sky-image-bright-sun-blue-dark-stormy-149924291.jpg')">
+			<h1 class="m-0 text-white"><i class="fa-solid fa-cloud-sun-rain"></i> Guillermo's US Weather App</h1>
+		</div>
+
+		<Map InitialValues="@InitialMapValues" @bind-CurrentLocation="CurrentLocation"></Map>
+
+		<Weather_LocationConditions Location="@CurrentLocation"></Weather_LocationConditions>
+
+	</ChildContent>
+
+	<ErrorContent>
+
+		<div class="p-3">
+
+			<div class="alert alert-danger" role="alert">
+				<h4 class="alert-heading"><i class="fa-solid fa-triangle-exclamation"></i> Error</h4>
+				<p><strong>Error Message:</strong> @context.Message</p>
+				@if (context.InnerException != null)
+				{
+					<p><strong>Inner Exception:</strong> @context.InnerException.Message</p>
+				}
+				<p><strong>Stack Trace:</strong></p>
+				<pre><code>@context.StackTrace</code></pre>
+				<hr>
+				<p class="mb-0">We are very sorry, we have a copy of this error and we will trace fix it as soon as possible.</p>
+			</div>
+		</div>
+
+	</ErrorContent>	
+
+</ErrorBoundary>
+
+@code {
+
+	protected async override Task OnInitializedAsync()
+	{
+		InitialMapValues = await Repository.LoadInitialMapSettings();
+	}
+
+	private ILocalizable InitialMapValues { get; set; }
+
+	private ILocalizable? CurrentLocation { get; set; } = null;
+
+}

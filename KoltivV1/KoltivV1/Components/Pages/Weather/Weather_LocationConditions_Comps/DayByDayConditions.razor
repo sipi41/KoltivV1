@@ -1,0 +1,35 @@
+﻿@using KoltivV1.ViewModels.Weather.Gov.API
+
+@if (Periods.Any())
+{
+	foreach (Forecast_Period item in Periods)
+	{
+		<div class="col-2">
+
+			<div class="card " style="">
+				
+				<div class="w-100 bg-danger" style="min-height:100px; background-image: url('@item.Icon'); background-repeat: no-repeat;   background-size: cover; background-position-y:center;"></div>
+				
+				<div class="card-body pt-1 px-2">
+					<h5 class="m-0" style="font-size:1.05rem !important;">@item.Name</h5>
+					<h4 class="m-0 text-primary card-title"><b>@(item.Temperature)@item.TemperatureUnit</b></h4>
+					<h5 class="fw-bold" style="font-size:1.05rem !important;">@item.ShortForecast</h5>
+					<div class="text-muted" style="font-size:small;">@item.DetailedForecast</div>
+				</div>
+			</div>
+
+		</div>
+	}
+
+}
+else
+{
+	<div class="p-3 text-muted" style="font-size:x-small;">loading...</div>
+}
+
+@code {
+
+	[Parameter, EditorRequired]
+	public IEnumerable<Forecast_Period> Periods { get; set; } = Enumerable.Empty<Forecast_Period>();
+
+}

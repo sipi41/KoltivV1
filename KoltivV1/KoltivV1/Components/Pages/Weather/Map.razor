@@ -1,0 +1,85 @@
+﻿@using KoltivV1.Application
+@using KoltivV1.ViewModels
+@rendermode InteractiveServer
+
+@inject IJSRuntime js
+@inject IRepository Repository
+@inject ILogger<Home> Logger
+
+@implements IAsyncDisposable
+
+<div id="map" class="W-100" style="min-height:300px;"></div>
+
+@code {
+
+	[Parameter, EditorRequired]
+	public ILocalizable InitialValues { get; set; }
+
+	[Parameter, EditorRequired]
+	public ILocalizable? CurrentLocation { get; set; }
+
+	[Parameter]
+	public EventCallback<ILocalizable> CurrentLocationChanged { get; set; }
+
+	IJSObjectReference? module;
+
+	private DotNetObjectReference<Map>? dotNetHelper;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			module = await js.InvokeAsync<IJSObjectReference>("import", "./Components/Pages/Weather/Map.razor.js");
+
+			dotNetHelper = DotNetObjectReference.Create(this); 
+
+			await module.InvokeVoidAsync("mapFunctions.setDotNetHelper", dotNetHelper); 
+
+			if (module != null)
+			{
+				await module.InvokeVoidAsync("mapFunctions.initMap", InitialValues.lat, InitialValues.lng, InitialValues.zoom);
+			}
+
+		}
+
+		await base.OnAfterRenderAsync(firstRender);
+
+	}
+
+	[JSInvokable]
+	public async Task ReceiveNewGeolocation(float Lat, float Lng)
+	{
+		bool IsUnitedStatesAddress = await module.InvokeAsync<bool>("mapFunctions.IsUnitedStatesAddress", Lat, Lng);
+
+		if(IsUnitedStatesAddress == false)
+		{
+			await module.InvokeVoidAsync("mapFunctions.ShowNonUSAddressMsg", Lat, Lng);
+
+		} else {
+
+			Logger.LogInformation($"Location Selected: Lat:{Lat}, Lng:{Lng}");
+
+			CurrentLocation = Repository.GetLocalizableObj(Lat, Lng);
+
+			if (CurrentLocationChanged.HasDelegate) CurrentLocationChanged.InvokeAsync(CurrentLocation);
+
+		}
+
+	}
+
+	public ValueTask DisposeAsync()
+	{
+		if (module != null)
+		{
+			_ = module.DisposeAsync();
+		}
+
+		if (dotNetHelper != null)
+		{
+			dotNetHelper.Dispose();
+		}
+
+		return ValueTask.CompletedTask;
+	}
+
+}
